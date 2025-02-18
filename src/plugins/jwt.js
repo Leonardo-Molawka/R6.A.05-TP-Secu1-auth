@@ -1,21 +1,37 @@
-import fp from 'fastify-plugin'
+import { fileURLToPath } from "url";
+import path from "path";
+import fs from "fs";
 import fastifyJwt from "@fastify/jwt";
-import fs from 'fs';
-import path from 'path';
+import fp from "fastify-plugin";
 
-export default fp(async function (app, opts) {
-    const privateKey = fs.readFileSync(path.resolve(__dirname, '../.ssl/private.key'));
-    const publicKey = fs.readFileSync(path.resolve(__dirname, '../.ssl/public.key'));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const privateKeyPath = path.resolve(__dirname, "../.ssl/private.key");
+const publicKeyPath = path.resolve(__dirname, "../.ssl/public.key");
+
+console.log("🔍 Chemin private.key:", privateKeyPath);
+console.log("🔍 Chemin public.key:", publicKeyPath);
+
+export default fp(async function (app) {
+    const privateKey = fs.readFileSync(privateKeyPath, "utf8");
+    const publicKey = fs.readFileSync(publicKeyPath, "utf8");
+
+    if (!privateKey || !publicKey) {
+        throw new Error("Les clés JWT ne sont pas valides !");
+    }
 
     app.register(fastifyJwt, {
+        secret: {
+            private: privateKey,
+            public: publicKey,
+        },
         sign: {
-            algorithm: 'ES256',
-            key: privateKey,
-            issuer: 'info.iutparis.fr'
+            algorithm: "ES256",
+            issuer: "info.iutparis.fr",
         },
         verify: {
-            algorithm: ['ES256'],
-            key: publicKey
-        }
+            algorithms: ["ES256"],
+        },
     });
 });

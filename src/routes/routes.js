@@ -1,7 +1,6 @@
-import {addUser, loginUser} from "../controllers/login.js";
+import { addUser, loginUser } from "../controllers/login.js";
 
-export default async (app, opts) => {
-    app.post('/signup', {}, addUser)
-    app.post('/signin', {}, loginUser)
-}
-
+export default async (app) => {
+    app.post("/signup", addUser);
+    app.post("/signin", loginUser);
+};
